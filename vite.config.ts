@@ -12,8 +12,6 @@ export default defineConfig(({ mode }) => {
     define: {
       // Dit zorgt ervoor dat process.env.API_KEY beschikbaar is in de browser code
       'process.env.API_KEY': JSON.stringify(env.API_KEY),
-      // Polyfill voor andere process.env calls om crashes te voorkomen
-      'process.env': {}
     }
   };
 });

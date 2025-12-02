@@ -2,11 +2,12 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Car, MaintenanceRecord, MaintenanceSuggestion } from "../types";
 
 // Initialize the client safely
-const apiKey = process.env.API_KEY;
+// We use the env variable if available, otherwise fallback to the hardcoded key provided by the user
+const apiKey = process.env.API_KEY || "AIzaSyCqpGBL2oEj0jzjBKOicFaJHI7A8YlO-7Y";
 
 // Debug log (veilig)
 if (!apiKey) {
-  console.error("CRITICAL: API_KEY is undefined in de browser. Controleer vite.config.ts en je .env bestand.");
+  console.error("CRITICAL: API_KEY is undefined.");
 } else {
   console.log(`Gemini Service gestart. API Key aanwezig (start met: ${apiKey.substring(0, 4)}...)`);
 }
@@ -115,7 +116,7 @@ export const getMaintenanceAdvice = async (
   } catch (error: any) {
     console.error("Fout bij ophalen advies (Gemini):", error);
     if (error.message?.includes('403') || error.status === 403) {
-        console.error(`TIP: Toegang geweigerd door Google. Voeg "${window.location.origin}/*" toe aan je API Key restricties in Google AI Studio.`);
+        console.error(`TIP: Toegang geweigerd door Google (403). Controleer of "${window.location.origin}" is toegevoegd aan de API Key restricties in Google AI Studio.`);
     }
     return [];
   }
