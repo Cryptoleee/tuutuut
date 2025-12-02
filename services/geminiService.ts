@@ -1,13 +1,29 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Car, MaintenanceRecord, MaintenanceSuggestion } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Initialize the client safely
+const apiKey = process.env.API_KEY;
+const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
 export const getMaintenanceAdvice = async (
   car: Car,
   history: MaintenanceRecord[]
 ): Promise<MaintenanceSuggestion[]> => {
+  if (!apiKey) {
+    console.error("API_KEY ontbreekt in environment variables.");
+    return [];
+  }
+
   try {
+    // Check for custom user intervals to prioritize
+    let intervalContext = "";
+    if (car.customMaintenanceIntervals && car.customMaintenanceIntervals.length > 0) {
+        intervalContext = "De gebruiker heeft de volgende EIGEN onderhoudsintervallen ingesteld. NEGEER de fabrieksopgave voor deze specifieke taken en gebruik de waarde van de gebruiker:\n";
+        car.customMaintenanceIntervals.forEach(ci => {
+            intervalContext += `- ${ci.taskName}: elke ${ci.intervalKm} km\n`;
+        });
+    }
+
     const historyText = history
       .map(
         (h) =>
@@ -18,6 +34,8 @@ export const getMaintenanceAdvice = async (
     const prompt = `
       Ik heb een auto: ${car.make} ${car.model} uit ${car.year} met brandstoftype ${car.fuelType}.
       De huidige kilometerstand is ${car.mileage} km.
+      
+      ${intervalContext}
       
       Dit is de onderhoudshistorie die bekend is:
       ${historyText ? historyText : "Geen historie bekend."}
@@ -87,7 +105,7 @@ export const getMaintenanceAdvice = async (
 
     return JSON.parse(jsonText) as MaintenanceSuggestion[];
   } catch (error) {
-    console.error("Fout bij ophalen advies:", error);
+    console.error("Fout bij ophalen advies (Gemini):", error);
     return [];
   }
 };
@@ -104,14 +122,23 @@ export const chatWithMechanic = async (
   chatHistory: ChatMessage[],
   contextData: { cars: Car[]; activeCarId: string | null; logs: MaintenanceRecord[] }
 ): Promise<string> => {
+  if (!apiKey) {
+      return "Configuratie fout: API Key ontbreekt.";
+  }
+
   try {
     // Construct context string
-    let systemContext = "Je bent AutoSlim, een behulpzame, deskundige AI automonteur. Je helpt de gebruiker met vragen over hun auto's en onderhoud.\n";
+    let systemContext = "Je bent Tuutuut Assistent, een behulpzame, deskundige AI automonteur. Je helpt de gebruiker met vragen over hun auto's en onderhoud.\n";
     
     if (contextData.cars.length > 0) {
       systemContext += "\nDe gebruiker heeft de volgende auto's:\n";
       contextData.cars.forEach(c => {
         systemContext += `- ${c.make} ${c.model} (${c.year}), ${c.fuelType}, ${c.mileage}km (Kenteken: ${c.licensePlate})\n`;
+        
+        // Add custom intervals context if present
+        if (c.customMaintenanceIntervals && c.customMaintenanceIntervals.length > 0) {
+            systemContext += `  Let op: Gebruiker hanteert eigen intervallen: ${c.customMaintenanceIntervals.map(i => `${i.taskName} elke ${i.intervalKm}km`).join(', ')}\n`;
+        }
       });
 
       // Filter logs for active car or all logs
@@ -203,6 +230,6 @@ export const chatWithMechanic = async (
     return response.text || "Sorry, ik begreep dat niet helemaal.";
   } catch (error) {
     console.error("Chat error:", error);
-    return "Er is een fout opgetreden bij het verbinden met de AI monteur.";
+    return "Er is een fout opgetreden bij het verbinden met de AI monteur. Controleer de API Key.";
   }
 };

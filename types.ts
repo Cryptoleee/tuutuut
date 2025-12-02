@@ -1,3 +1,8 @@
+export interface CustomMaintenanceInterval {
+  taskName: string;
+  intervalKm: number;
+}
+
 export interface Car {
   id: string;
   make: string; // Merk
@@ -11,6 +16,7 @@ export interface Car {
   photoUrl?: string; // Base64 string of the car image
   lastAdvice?: MaintenanceSuggestion[]; // Cache for AI advice
   lastAdviceDate?: string; // Timestamp of last advice
+  customMaintenanceIntervals?: CustomMaintenanceInterval[]; // Custom user intervals
 }
 
 export interface MaintenanceRecord {
