@@ -92,9 +92,15 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initial
         });
         
         handleClose();
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error adding/saving car:", error);
-        alert("Fout bij opslaan auto. Controleer je verbinding.");
+        if (error.code === 'permission-denied') {
+            alert("Toegang geweigerd. Heb je de Firestore Database aangemaakt en de 'Rules' ingesteld in de Firebase Console?");
+        } else if (error.code === 'unavailable') {
+             alert("Kan geen verbinding maken met de database. Controleer of Firestore is ingeschakeld in je project.");
+        } else {
+            alert(`Fout bij opslaan: ${error.message}`);
+        }
     } finally {
         setIsSubmitting(false);
     }

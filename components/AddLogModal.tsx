@@ -72,9 +72,13 @@ const AddLogModal: React.FC<Props> = ({ isOpen, onClose, onSave, carId, initialD
         });
         
         onClose();
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to save log", error);
-        alert("Fout bij opslaan. Probeer opnieuw.");
+        if (error.code === 'permission-denied') {
+            alert("Toegang geweigerd. Controleer je Firestore Rules.");
+        } else {
+            alert(`Fout bij opslaan: ${error.message}`);
+        }
     } finally {
         setIsSubmitting(false);
     }

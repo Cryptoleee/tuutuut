@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider, isFirebaseConfigured } from '../firebase';
-import { Wrench, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Wrench, AlertTriangle, ArrowRight, AlertCircle } from 'lucide-react';
 // import FirebaseSetupModal from './FirebaseSetupModal'; // No longer needed as config is hardcoded
 
 interface Props {
@@ -10,17 +10,27 @@ interface Props {
 
 const LoginScreen: React.FC<Props> = ({ onGuestLogin }) => {
   const [showGuestWarning, setShowGuestWarning] = useState(false);
-  // const [showSetup, setShowSetup] = useState(false); // No longer needed
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const isConfigured = isFirebaseConfigured();
 
   const handleLogin = async () => {
-    // Config is hardcoded, so no need to check or show setup
+    setErrorMessage(null);
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error: any) {
       console.error("Login failed", error);
-      alert("Inloggen mislukt. Controleer je internetverbinding.");
+      
+      // Specifieke foutmeldingen vertalen voor de gebruiker
+      if (error.code === 'auth/popup-closed-by-user') {
+        return; // Gebruiker klikte het weg, geen error nodig
+      } else if (error.code === 'auth/unauthorized-domain') {
+        setErrorMessage("Dit domein is niet toegestaan. Voeg 'tuutuut.vercel.app' toe in de Firebase Console bij Authentication -> Settings -> Authorized Domains.");
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        return;
+      } else {
+        setErrorMessage(`Inloggen mislukt: ${error.message}`);
+      }
     }
   };
 
@@ -43,6 +53,13 @@ const LoginScreen: React.FC<Props> = ({ onGuestLogin }) => {
                     <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
                         Houd je auto-onderhoud bij, ontvang slim AI advies en bewaar al je werkbonnen veilig in de cloud.
                     </p>
+
+                    {errorMessage && (
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4 text-left flex gap-3">
+                             <AlertCircle className="text-red-500 shrink-0" size={20} />
+                             <p className="text-sm text-red-600 dark:text-red-300 font-medium">{errorMessage}</p>
+                        </div>
+                    )}
 
                     <div className="space-y-3 relative z-10">
                         <button 
