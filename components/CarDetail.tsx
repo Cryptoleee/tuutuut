@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Car, MaintenanceRecord, MaintenanceSuggestion } from '../types';
-import { ArrowLeft, Plus, History, Sparkles, Gauge, CheckCircle, RefreshCw, Clock, Euro, Calendar, AlertCircle, Info, PenTool, CarFront, Camera, ChevronDown, ChevronUp, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Plus, History, Sparkles, Gauge, CheckCircle, RefreshCw, Clock, Euro, Calendar, AlertCircle, Info, PenTool, CarFront, Camera, ChevronDown, ChevronUp, Lightbulb, Pencil, FileText } from 'lucide-react';
 import { getMaintenanceAdvice } from '../services/geminiService';
 import AddLogModal from './AddLogModal';
+import AddCarModal from './AddCarModal';
 import { uploadFileToStorage } from '../services/storageService';
 import { auth } from '../firebase';
 import { compressImage } from '../utils/imageUtils';
@@ -20,6 +21,7 @@ interface Props {
 
 const CarDetail: React.FC<Props> = ({ car, logs, onBack, onAddLog, onUpdateLog, onUpdateMileage, onUpdateCar, highlightedTask }) => {
   const [isLogModalOpen, setLogModalOpen] = useState(false);
+  const [isEditCarModalOpen, setEditCarModalOpen] = useState(false);
   const [loadingAdvice, setLoadingAdvice] = useState(false);
   const [newMileage, setNewMileage] = useState(car.mileage.toString());
   const [isEditingMileage, setIsEditingMileage] = useState(false);
@@ -122,6 +124,14 @@ const CarDetail: React.FC<Props> = ({ car, logs, onBack, onAddLog, onUpdateLog, 
           }
       }
       handleModalClose();
+  };
+
+  const handleEditCarSave = async (carData: Omit<Car, 'id'>) => {
+      await onUpdateCar({
+          ...car,
+          ...carData
+      });
+      setEditCarModalOpen(false);
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -269,19 +279,35 @@ const CarDetail: React.FC<Props> = ({ car, logs, onBack, onAddLog, onUpdateLog, 
             />
         </div>
 
-        <div className="px-1 flex-1">
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300">
-                {car.make} {car.model}
-            </h1>
-            <div className="flex items-center gap-3 mt-1">
-                 <span className="bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-2.5 py-0.5 rounded-lg text-sm font-mono font-bold uppercase tracking-wider">
-                    {car.licensePlate}
-                 </span>
-                 <span className="text-gray-400">•</span>
-                 <span className="text-gray-600 dark:text-gray-400 font-medium">{car.year}</span>
-                 <span className="text-gray-400">•</span>
-                 <span className="text-gray-600 dark:text-gray-400 font-medium">{car.fuelType}</span>
+        <div className="px-1 flex-1 flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+            <div>
+                <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300">
+                    {car.make} {car.model}
+                </h1>
+                <div className="flex flex-wrap items-center gap-3 mt-1">
+                    <span className="bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 px-2.5 py-0.5 rounded-lg text-sm font-mono font-bold uppercase tracking-wider">
+                        {car.licensePlate}
+                    </span>
+                    <span className="text-gray-400">•</span>
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">{car.year}</span>
+                    <span className="text-gray-400">•</span>
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">{car.fuelType}</span>
+                    {car.vin && (
+                        <>
+                            <span className="text-gray-400 hidden sm:inline">•</span>
+                            <span className="text-gray-500 dark:text-gray-500 text-xs font-mono hidden sm:inline" title="VIN / Chassisnummer">VIN: {car.vin}</span>
+                        </>
+                    )}
+                </div>
             </div>
+            
+            <button 
+                onClick={() => setEditCarModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300 font-medium transition-colors shadow-sm"
+            >
+                <Pencil size={16} />
+                <span>Bewerken</span>
+            </button>
         </div>
       </div>
 
@@ -560,6 +586,14 @@ const CarDetail: React.FC<Props> = ({ car, logs, onBack, onAddLog, onUpdateLog, 
                 mileageAtService: car.mileage
             } : undefined
         }
+      />
+      
+      <AddCarModal
+        isOpen={isEditCarModalOpen}
+        onClose={() => setEditCarModalOpen(false)}
+        onSave={handleEditCarSave}
+        userId={auth.currentUser ? auth.currentUser.uid : 'guest'}
+        initialData={car}
       />
     </div>
   );

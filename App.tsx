@@ -413,7 +413,7 @@ const App: React.FC = () => {
       <AddCarModal 
         isOpen={isAddCarModalOpen} 
         onClose={() => setAddCarModalOpen(false)}
-        onAdd={handleAddCar}
+        onSave={handleAddCar}
         userId={user ? user.uid : 'guest'}
       />
       

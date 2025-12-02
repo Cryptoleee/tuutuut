@@ -6,6 +6,7 @@ export interface Car {
   mileage: number; // Huidige kilometerstand
   fuelType: string; // Benzine, Diesel, Elektrisch, etc.
   licensePlate: string; // Kenteken
+  vin?: string; // Vehicle Identification Number
   apkDate?: string; // APK Expiry Date (YYYY-MM-DD)
   photoUrl?: string; // Base64 string of the car image
   lastAdvice?: MaintenanceSuggestion[]; // Cache for AI advice

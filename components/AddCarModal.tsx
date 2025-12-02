@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Car } from '../types';
-import { X, CarFront, Search, Loader2, Camera, PlusCircle } from 'lucide-react';
+import { X, CarFront, Search, Loader2, Camera, PlusCircle, Save } from 'lucide-react';
 import { fetchCarDataByLicensePlate } from '../services/rdwService';
 import { fetchCarImage } from '../services/imageService';
 import { uploadFileToStorage } from '../services/storageService';
@@ -10,28 +10,53 @@ import { compressImage } from '../utils/imageUtils';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (car: Omit<Car, 'id'>) => Promise<void>;
+  onSave: (car: Omit<Car, 'id'>) => Promise<void>;
   userId: string;
+  initialData?: Car;
 }
 
-const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onAdd, userId }) => {
-  const [formData, setFormData] = useState({
+const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initialData }) => {
+  const defaultForm = {
     make: '',
     model: '',
     year: new Date().getFullYear(),
     mileage: 0,
     fuelType: 'Benzine',
     licensePlate: '',
+    vin: '',
     photoUrl: '',
     apkDate: ''
-  });
+  };
 
+  const [formData, setFormData] = useState(defaultForm);
   const [loadingRDW, setLoadingRDW] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const [rdwError, setRdwError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+        if (initialData) {
+            setFormData({
+                make: initialData.make,
+                model: initialData.model,
+                year: initialData.year,
+                mileage: initialData.mileage,
+                fuelType: initialData.fuelType,
+                licensePlate: initialData.licensePlate,
+                vin: initialData.vin || '',
+                photoUrl: initialData.photoUrl || '',
+                apkDate: initialData.apkDate || ''
+            });
+        } else {
+            setFormData(defaultForm);
+        }
+        setSelectedFile(null);
+        setRdwError(null);
+    }
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
@@ -53,23 +78,23 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onAdd, userId }) => {
                 // This is already set in handleImageSelect via FileReader
             }
         } 
-        // 2. If NO file selected, NO existing photoUrl, try to fetch stock image
-        else if (!photoUrl && formData.make && formData.model) {
+        // 2. If NO file selected, NO existing photoUrl, try to fetch stock image (only for new cars or if explicit retry)
+        else if (!photoUrl && formData.make && formData.model && !initialData) {
            const stockImage = await fetchCarImage(formData.make, formData.model, formData.year);
            if (stockImage) {
              photoUrl = stockImage;
            }
         }
 
-        await onAdd({
+        await onSave({
             ...formData,
             photoUrl
         });
         
         handleClose();
     } catch (error) {
-        console.error("Error adding car:", error);
-        alert("Fout bij toevoegen auto. Controleer je verbinding.");
+        console.error("Error adding/saving car:", error);
+        alert("Fout bij opslaan auto. Controleer je verbinding.");
     } finally {
         setIsSubmitting(false);
     }
@@ -77,17 +102,7 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onAdd, userId }) => {
 
   const handleClose = () => {
     onClose();
-    // Reset form
-    setFormData({
-        make: '',
-        model: '',
-        year: new Date().getFullYear(),
-        mileage: 0,
-        fuelType: 'Benzine',
-        licensePlate: '',
-        photoUrl: '',
-        apkDate: ''
-    });
+    setFormData(defaultForm);
     setSelectedFile(null);
     setRdwError(null);
   };
@@ -162,7 +177,9 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onAdd, userId }) => {
             <div className="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg text-primary">
                 <CarFront size={20} />
             </div>
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white">Nieuwe Auto</h2>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+                {initialData ? 'Auto Bewerken' : 'Nieuwe Auto'}
+            </h2>
           </div>
           <button onClick={handleClose} disabled={isSubmitting} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-800 p-2 rounded-full transition-all">
             <X size={20} />
@@ -295,7 +312,6 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onAdd, userId }) => {
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">Huidige KM-stand</label>
               <input 
-                required
                 name="mileage"
                 type="number" 
                 placeholder="0"
@@ -316,13 +332,25 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onAdd, userId }) => {
             </div>
           </div>
 
+          <div>
+             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">VIN / Chassisnummer</label>
+             <input 
+                name="vin"
+                type="text" 
+                placeholder="Optioneel"
+                className={`${inputClasses} font-mono uppercase`}
+                value={formData.vin}
+                onChange={handleChange}
+              />
+          </div>
+
           <button 
             type="submit"
             disabled={isSubmitting || isCompressing}
             className="w-full mt-2 bg-gradient-to-r from-primary to-secondary text-white font-bold py-3.5 rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <PlusCircle size={20} />}
-            {isSubmitting ? 'Opslaan...' : 'Auto Toevoegen'}
+            {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : initialData ? <Save size={20} /> : <PlusCircle size={20} />}
+            {isSubmitting ? 'Bezig...' : initialData ? 'Wijzigingen Opslaan' : 'Auto Toevoegen'}
           </button>
         </form>
       </div>
