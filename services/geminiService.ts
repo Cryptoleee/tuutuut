@@ -1,28 +1,16 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Car, MaintenanceRecord, MaintenanceSuggestion } from "../types";
 
-// Force the key provided by the user to rule out environment variable issues
-const HARDCODED_KEY = "AIzaSyCqpGBL2oEj0jzjBKOicFaJHI7A8YlO-7Y";
-
-// Logic: Use Env key if valid, otherwise use hardcoded key
-let apiKey = process.env.API_KEY;
-if (!apiKey || apiKey.length < 10 || apiKey.includes("undefined")) {
-    apiKey = HARDCODED_KEY;
-}
-
-// Debug log to help user verify in browser console
-console.log(`%c[Tuutuut] Gemini Service Init`, 'color: cyan; font-weight: bold;');
-console.log(`Using API Key starting with: ${apiKey ? apiKey.substring(0, 5) + '...' : 'NONE'}`);
-console.log(`Current Origin: ${window.location.origin}`);
-
-const ai = new GoogleGenAI({ apiKey: apiKey || '' });
+// Initialize the client directly with the environment variable
+// Ensure you have added API_KEY to your Vercel Environment Variables
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const getMaintenanceAdvice = async (
   car: Car,
   history: MaintenanceRecord[]
 ): Promise<MaintenanceSuggestion[]> => {
-  if (!apiKey) {
-    console.error("API_KEY ontbreekt. Kan geen advies ophalen.");
+  if (!process.env.API_KEY) {
+    console.error("API_KEY ontbreekt in environment variables.");
     return [];
   }
 
@@ -55,7 +43,7 @@ export const getMaintenanceAdvice = async (
       Jij bent een expert automonteur. Analyseer de auto en de historie.
       
       Je doel is om een 'monitor' te maken voor de gebruiker. 
-      1. Kijk naar wat er gerepareerd is en bereken wanneer dit WEER moet gebeuren (bijv. olie elke 15k-30k km).
+      1. Kijk naar wat er gerepareerd is en bereken wanneer dit WEER moet gebeuren.
       2. Kijk naar wat er nog niet gedaan is maar wel moet gebeuren gezien de leeftijd/km-stand.
       
       Genereer een lijst met concrete onderhoudsadviezen of toekomstige checks.
@@ -66,8 +54,9 @@ export const getMaintenanceAdvice = async (
       Geef antwoord in het Nederlands.
     `;
 
+    // Using Gemini 3 Pro Preview for better reasoning
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -118,9 +107,6 @@ export const getMaintenanceAdvice = async (
     return JSON.parse(jsonText) as MaintenanceSuggestion[];
   } catch (error: any) {
     console.error("Fout bij ophalen advies (Gemini):", error);
-    if (error.message?.includes('403') || error.status === 403) {
-        console.error(`TIP: Toegang geweigerd door Google (403). Controleer of "${window.location.origin}" is toegevoegd aan de API Key restricties in Google AI Studio.`);
-    }
     return [];
   }
 };
@@ -137,8 +123,8 @@ export const chatWithMechanic = async (
   chatHistory: ChatMessage[],
   contextData: { cars: Car[]; activeCarId: string | null; logs: MaintenanceRecord[] }
 ): Promise<string> => {
-  if (!apiKey) {
-      return "Configuratie fout: API Key ontbreekt in de applicatie.";
+  if (!process.env.API_KEY) {
+      return "Configuratie fout: API Key ontbreekt. Controleer Vercel instellingen.";
   }
 
   try {
@@ -191,7 +177,6 @@ export const chatWithMechanic = async (
          if (msg.image) {
             try {
                 // Extract base64 data and mime type
-                // Expected format: data:image/png;base64,.....
                 const matches = msg.image.match(/^data:(.+);base64,(.+)$/);
                 if (matches && matches.length === 3) {
                     parts.push({ 
@@ -237,17 +222,15 @@ export const chatWithMechanic = async (
         }
     }
 
+    // Using Gemini 3 Pro Preview
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-pro-preview",
       contents: contents,
     });
 
     return response.text || "Sorry, ik begreep dat niet helemaal.";
   } catch (error: any) {
     console.error("Chat error:", error);
-    if (error.message?.includes('403') || error.status === 403) {
-        return `Fout: Toegang geweigerd (403). Het domein "${window.location.hostname}" is niet toegestaan in je Google AI Studio API Key instellingen. Voeg "${window.location.origin}/*" toe aan de 'Website restrictions'. (Key used: ${apiKey ? apiKey.substring(0,4)+'...' : 'None'})`;
-    }
     return "Er is een fout opgetreden bij het verbinden met de AI monteur. Controleer of je API Key geldig is.";
   }
 };

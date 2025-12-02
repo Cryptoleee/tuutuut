@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
-      // Dit zorgt ervoor dat process.env.API_KEY beschikbaar is in de browser code
+      // Clean injection of the API Key
       'process.env.API_KEY': JSON.stringify(env.API_KEY),
     }
   };
