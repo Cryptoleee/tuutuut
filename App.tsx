@@ -8,7 +8,7 @@ import LoginScreen from './components/LoginScreen';
 import { CarFront, ChevronRight, PlusCircle, Wrench, Bell, Sun, Moon, LogOut, Loader2, User as UserIcon } from 'lucide-react';
 import { auth } from './firebase';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
-import { subscribeToCars, subscribeToLogs, addCarToFirestore, addLogToFirestore, updateLogInFirestore, updateCarInFirestore } from './services/firestoreService';
+import { subscribeToCars, subscribeToLogs, addCarToFirestore, addLogToFirestore, updateLogInFirestore, updateCarInFirestore, deleteLogFromFirestore } from './services/firestoreService';
 
 const STORAGE_KEY_THEME = 'autoslim_theme';
 const STORAGE_KEY_CARS = 'autoslim_cars';
@@ -168,6 +168,16 @@ const App: React.FC = () => {
     }
   };
 
+  const handleDeleteLog = async (logId: string) => {
+      if (user) {
+          await deleteLogFromFirestore(user.uid, logId);
+      } else {
+          // Guest mode delete
+          const newLogs = logs.filter(l => l.id !== logId);
+          saveLogsLocally(newLogs);
+      }
+  };
+
   const handleUpdateMileage = async (carId: string, mileage: number) => {
       const currentCar = cars.find(c => c.id === carId);
       if (currentCar) {
@@ -204,14 +214,14 @@ const App: React.FC = () => {
 
   if (loadingAuth) {
       return (
-          <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-primary">
+          <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-neutral-950 text-primary">
               <Loader2 className="animate-spin" size={48} />
           </div>
       );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950 text-gray-800 dark:text-gray-100 pb-20 relative transition-colors duration-300">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-neutral-950 text-gray-800 dark:text-gray-100 pb-20 relative transition-colors duration-300">
       
       {/* Login Overlay if not logged in and not guest */}
       {!user && !isGuest && (
@@ -219,7 +229,7 @@ const App: React.FC = () => {
       )}
 
       {/* Top Navigation */}
-      <nav className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 sticky top-0 z-30 shadow-sm transition-colors duration-300">
+      <nav className="bg-white dark:bg-neutral-900 border-b border-gray-100 dark:border-neutral-800 sticky top-0 z-30 shadow-sm transition-colors duration-300">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => setSelectedCarId(null)}>
             <div className="bg-gradient-to-tr from-primary to-secondary text-white p-1.5 rounded-lg shadow-sm">
@@ -231,7 +241,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-2 sm:gap-4">
               <button 
                 onClick={toggleDarkMode}
-                className="p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-full transition-colors text-gray-500 dark:text-gray-400"
+                className="p-2 hover:bg-gray-50 dark:hover:bg-neutral-800 rounded-full transition-colors text-gray-500 dark:text-gray-400"
               >
                   {darkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
@@ -239,11 +249,11 @@ const App: React.FC = () => {
               <div className="relative">
                   <button 
                     onClick={() => setNotificationOpen(!isNotificationOpen)}
-                    className="p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-full transition-colors relative"
+                    className="p-2 hover:bg-gray-50 dark:hover:bg-neutral-800 rounded-full transition-colors relative"
                   >
                       <Bell size={20} className="text-gray-500 dark:text-gray-400" />
                       {alertCount > 0 && (
-                          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border border-white dark:border-slate-900"></span>
+                          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border border-white dark:border-neutral-900"></span>
                       )}
                   </button>
                   <NotificationCenter 
@@ -254,13 +264,13 @@ const App: React.FC = () => {
                   />
               </div>
 
-              <div className="h-6 w-px bg-gray-200 dark:bg-slate-700 mx-1"></div>
+              <div className="h-6 w-px bg-gray-200 dark:bg-neutral-700 mx-1"></div>
 
               <div className="flex items-center gap-2">
                   {user ? (
                       <>
                         {user.photoURL ? (
-                            <img src={user.photoURL} alt={user.displayName || 'User'} className="w-8 h-8 rounded-full border border-gray-200 dark:border-slate-700" />
+                            <img src={user.photoURL} alt={user.displayName || 'User'} className="w-8 h-8 rounded-full border border-gray-200 dark:border-neutral-700" />
                         ) : (
                             <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
                                 <UserIcon size={16} />
@@ -268,12 +278,12 @@ const App: React.FC = () => {
                         )}
                       </>
                   ) : (
-                      <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-400">
+                      <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center text-gray-400">
                           <UserIcon size={16} />
                       </div>
                   )}
                   
-                  <button onClick={handleLogout} className="p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-full text-gray-500 dark:text-gray-400" title={user ? "Uitloggen" : "Reset"}>
+                  <button onClick={handleLogout} className="p-2 hover:bg-gray-50 dark:hover:bg-neutral-800 rounded-full text-gray-500 dark:text-gray-400" title={user ? "Uitloggen" : "Reset"}>
                       <LogOut size={20} />
                   </button>
               </div>
@@ -290,6 +300,7 @@ const App: React.FC = () => {
             onBack={() => setSelectedCarId(null)}
             onAddLog={handleAddLog}
             onUpdateLog={handleUpdateLog}
+            onDeleteLog={handleDeleteLog}
             onUpdateMileage={(m) => handleUpdateMileage(selectedCar.id, m)}
             onUpdateCar={handleUpdateCar}
             highlightedTask={highlightedTask}
@@ -298,7 +309,7 @@ const App: React.FC = () => {
           <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
             
             {/* Welcome Banner */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 text-white p-8 sm:p-10 shadow-2xl">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-neutral-900 to-neutral-800 dark:from-neutral-800 dark:to-neutral-900 text-white p-8 sm:p-10 shadow-2xl">
               <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white/5 blur-3xl"></div>
               <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-primary/20 blur-3xl"></div>
               
@@ -306,14 +317,14 @@ const App: React.FC = () => {
                 <h1 className="text-3xl sm:text-4xl font-bold mb-4">
                     {user ? `Welkom, ${user.displayName?.split(' ')[0]}` : 'Welkom bij Tuutuut'}
                 </h1>
-                <p className="text-slate-300 text-lg mb-8 leading-relaxed">
+                <p className="text-neutral-300 text-lg mb-8 leading-relaxed">
                   Vergeet nooit meer wanneer je olie ververst moet worden. 
                   Tuutuut houdt je onderhoud bij en voorspelt toekomstige reparaties met AI.
                 </p>
                 <div className="flex gap-4">
                     <button 
                         onClick={() => setAddCarModalOpen(true)}
-                        className="bg-white text-slate-900 px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-gray-50 transition transform hover:-translate-y-0.5 flex items-center gap-2"
+                        className="bg-white text-neutral-900 px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-gray-50 transition transform hover:-translate-y-0.5 flex items-center gap-2"
                     >
                         <PlusCircle size={20} className="text-primary" />
                         Auto Toevoegen
@@ -335,12 +346,12 @@ const App: React.FC = () => {
             <div>
                <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
                  Mijn Auto's 
-                 <span className="bg-gray-200 dark:bg-slate-800 text-gray-600 dark:text-gray-300 text-xs px-2 py-0.5 rounded-full">{cars.length}</span>
+                 <span className="bg-gray-200 dark:bg-neutral-800 text-gray-600 dark:text-gray-300 text-xs px-2 py-0.5 rounded-full">{cars.length}</span>
                </h2>
                
                {cars.length === 0 ? (
-                 <div className="border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-2xl p-12 text-center hover:border-primary/50 transition-colors cursor-pointer group" onClick={() => setAddCarModalOpen(true)}>
-                    <div className="w-16 h-16 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-50 dark:group-hover:bg-slate-700 transition-colors">
+                 <div className="border-2 border-dashed border-gray-200 dark:border-neutral-700 rounded-2xl p-12 text-center hover:border-primary/50 transition-colors cursor-pointer group" onClick={() => setAddCarModalOpen(true)}>
+                    <div className="w-16 h-16 bg-gray-50 dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-50 dark:group-hover:bg-neutral-700 transition-colors">
                         <CarFront className="text-gray-400 dark:text-gray-500 group-hover:text-primary transition-colors" size={32} />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Nog geen auto's</h3>
@@ -352,15 +363,15 @@ const App: React.FC = () => {
                         <div 
                             key={car.id} 
                             onClick={() => setSelectedCarId(car.id)}
-                            className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group relative overflow-hidden flex flex-col h-full"
+                            className="bg-white dark:bg-neutral-900 rounded-2xl shadow-sm border border-gray-100 dark:border-neutral-800 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group relative overflow-hidden flex flex-col h-full"
                         >
-                            <div className="h-48 w-full bg-gray-100 dark:bg-slate-800 relative overflow-hidden">
+                            <div className="h-56 w-full bg-gray-100 dark:bg-neutral-800 relative overflow-hidden p-4">
                                 {car.photoUrl ? (
-                                    <img src={car.photoUrl} alt={`${car.make} ${car.model}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                    <img src={car.photoUrl} alt={`${car.make} ${car.model}`} className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" />
                                 ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-800 dark:to-slate-700 text-gray-300 dark:text-slate-500">
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-neutral-800 dark:to-neutral-700 text-gray-300 dark:text-neutral-500">
                                         <CarFront size={48} />
-                                        <span className="text-xs mt-2 uppercase tracking-wide font-medium text-gray-400 dark:text-slate-400">Geen foto</span>
+                                        <span className="text-xs mt-2 uppercase tracking-wide font-medium text-gray-400 dark:text-neutral-400">Geen foto</span>
                                     </div>
                                 )}
                                 <div className="absolute bottom-3 left-3">
@@ -376,7 +387,7 @@ const App: React.FC = () => {
                                         <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{car.year} • {car.fuelType}</p>
                                     </div>
                                 </div>
-                                <div className="mt-4 pt-4 border-t border-gray-50 dark:border-slate-800 flex items-center justify-between text-sm">
+                                <div className="mt-4 pt-4 border-t border-gray-50 dark:border-neutral-800 flex items-center justify-between text-sm">
                                     <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></div>
                                         KM-stand
@@ -388,7 +399,7 @@ const App: React.FC = () => {
                                 <div className="absolute top-3 right-3">
                                     <span className="flex h-3 w-3">
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white dark:border-slate-800"></span>
+                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white dark:border-neutral-800"></span>
                                     </span>
                                 </div>
                             )}
@@ -396,9 +407,9 @@ const App: React.FC = () => {
                     ))}
                     <div 
                         onClick={() => setAddCarModalOpen(true)}
-                        className="bg-gray-50 dark:bg-slate-900 rounded-2xl border-2 border-dashed border-gray-200 dark:border-slate-800 hover:border-primary/50 hover:bg-blue-50/30 dark:hover:bg-slate-800/50 transition-all cursor-pointer flex flex-col items-center justify-center h-full min-h-[300px] gap-3 group"
+                        className="bg-gray-50 dark:bg-neutral-900 rounded-2xl border-2 border-dashed border-gray-200 dark:border-neutral-800 hover:border-primary/50 hover:bg-blue-50/30 dark:hover:bg-neutral-800/50 transition-all cursor-pointer flex flex-col items-center justify-center h-full min-h-[300px] gap-3 group"
                     >
-                        <div className="bg-white dark:bg-slate-800 p-4 rounded-full shadow-sm group-hover:scale-110 transition-transform">
+                        <div className="bg-white dark:bg-neutral-800 p-4 rounded-full shadow-sm group-hover:scale-110 transition-transform">
                             <PlusCircle className="text-gray-400 dark:text-gray-500 group-hover:text-primary" size={32} />
                         </div>
                         <span className="font-semibold text-gray-500 dark:text-gray-400 group-hover:text-primary transition-colors">Nieuwe auto toevoegen</span>

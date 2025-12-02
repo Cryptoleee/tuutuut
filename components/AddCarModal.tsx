@@ -173,12 +173,12 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initial
     setLoadingRDW(false);
   };
 
-  const inputClasses = "w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-slate-900 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all duration-200";
+  const inputClasses = "w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-950 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all duration-200";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800 bg-gradient-to-r from-gray-50 to-white dark:from-slate-900 dark:to-slate-800 sticky top-0 z-10">
+      <div className="bg-white dark:bg-neutral-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-neutral-800 bg-gradient-to-r from-gray-50 to-white dark:from-neutral-900 dark:to-neutral-800 sticky top-0 z-10">
           <div className="flex items-center gap-3">
             <div className="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg text-primary">
                 <CarFront size={20} />
@@ -187,7 +187,7 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initial
                 {initialData ? 'Auto Bewerken' : 'Nieuwe Auto'}
             </h2>
           </div>
-          <button onClick={handleClose} disabled={isSubmitting} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-800 p-2 rounded-full transition-all">
+          <button onClick={handleClose} disabled={isSubmitting} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-800 p-2 rounded-full transition-all">
             <X size={20} />
           </button>
         </div>
@@ -195,7 +195,7 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initial
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           
           <div 
-            className="w-full h-40 rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-950 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-900 hover:border-primary/50 transition-all group overflow-hidden relative"
+            className="w-full h-40 rounded-xl border-2 border-dashed border-gray-300 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-950 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-900 hover:border-primary/50 transition-all group overflow-hidden relative"
             onClick={() => !isSubmitting && !isCompressing && fileInputRef.current?.click()}
           >
             {isCompressing ? (
@@ -214,7 +214,7 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initial
                 </>
             ) : (
                 <div className="text-gray-400 dark:text-gray-500 flex flex-col items-center">
-                    <div className="bg-white dark:bg-slate-900 p-3 rounded-full mb-2 shadow-sm group-hover:scale-110 transition-transform">
+                    <div className="bg-white dark:bg-neutral-900 p-3 rounded-full mb-2 shadow-sm group-hover:scale-110 transition-transform">
                         <Camera size={24} className="text-primary" />
                     </div>
                     <span className="text-sm font-medium">Foto toevoegen</span>

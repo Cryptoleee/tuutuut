@@ -82,7 +82,7 @@ const ChatBot: React.FC<Props> = ({ cars, activeCarId, logs }) => {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
       {/* Chat Window */}
       {isOpen && (
-        <div className="bg-white dark:bg-slate-900 w-[90vw] sm:w-[400px] h-[500px] rounded-3xl shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col overflow-hidden mb-4 pointer-events-auto animate-in slide-in-from-bottom-5 fade-in duration-300 origin-bottom-right ring-1 ring-black/5 dark:ring-white/10">
+        <div className="bg-white dark:bg-neutral-900 w-[90vw] sm:w-[400px] h-[500px] rounded-3xl shadow-2xl border border-gray-100 dark:border-neutral-800 flex flex-col overflow-hidden mb-4 pointer-events-auto animate-in slide-in-from-bottom-5 fade-in duration-300 origin-bottom-right ring-1 ring-black/5 dark:ring-white/10">
           
           {/* Header */}
           <div className="bg-gradient-to-r from-violet-600 to-fuchsia-600 p-4 flex justify-between items-center text-white">
@@ -104,14 +104,14 @@ const ChatBot: React.FC<Props> = ({ cars, activeCarId, logs }) => {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-slate-50 dark:bg-slate-950">
+          <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-slate-50 dark:bg-neutral-950">
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                  <div className={`flex flex-col max-w-[85%] gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                     
                     <div className={`flex gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                         {/* Avatar */}
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm mt-auto ${msg.role === 'user' ? 'bg-violet-600 text-white' : 'bg-white dark:bg-slate-800 text-violet-600 border border-violet-100 dark:border-slate-700'}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm mt-auto ${msg.role === 'user' ? 'bg-violet-600 text-white' : 'bg-white dark:bg-neutral-800 text-violet-600 border border-violet-100 dark:border-neutral-700'}`}>
                             {msg.role === 'user' ? <User size={14} /> : <Bot size={16} />}
                         </div>
 
@@ -119,7 +119,7 @@ const ChatBot: React.FC<Props> = ({ cars, activeCarId, logs }) => {
                         <div className={`p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
                             msg.role === 'user' 
                                 ? 'bg-violet-600 text-white rounded-br-none' 
-                                : 'bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-800 dark:text-gray-100 rounded-bl-none'
+                                : 'bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-gray-800 dark:text-gray-100 rounded-bl-none'
                         }`}>
                             {msg.image && (
                                 <div className="mb-2 rounded-lg overflow-hidden border border-white/20">
@@ -136,10 +136,10 @@ const ChatBot: React.FC<Props> = ({ cars, activeCarId, logs }) => {
             {loading && (
                  <div className="flex justify-start animate-pulse">
                     <div className="flex max-w-[85%] gap-2">
-                        <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 text-violet-600 border border-violet-100 dark:border-slate-700 flex items-center justify-center shrink-0 mt-auto">
+                        <div className="w-8 h-8 rounded-full bg-white dark:bg-neutral-800 text-violet-600 border border-violet-100 dark:border-neutral-700 flex items-center justify-center shrink-0 mt-auto">
                             <Bot size={16} />
                         </div>
-                        <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 p-4 rounded-2xl rounded-bl-none shadow-sm flex items-center gap-2">
+                        <div className="bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 p-4 rounded-2xl rounded-bl-none shadow-sm flex items-center gap-2">
                             <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce"></span>
                             <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce delay-75"></span>
                             <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce delay-150"></span>
@@ -151,17 +151,17 @@ const ChatBot: React.FC<Props> = ({ cars, activeCarId, logs }) => {
           </div>
 
           {/* Input Area */}
-          <div className="bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 p-3">
+          <div className="bg-white dark:bg-neutral-900 border-t border-gray-100 dark:border-neutral-800 p-3">
               {/* Image Preview */}
               {(selectedImage || processingImage) && (
                   <div className="relative inline-block mb-3 ml-2 group">
                       {processingImage ? (
-                          <div className="h-16 w-16 bg-gray-100 dark:bg-slate-800 rounded-lg flex items-center justify-center border border-gray-200 dark:border-slate-700">
+                          <div className="h-16 w-16 bg-gray-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center border border-gray-200 dark:border-neutral-700">
                              <Loader2 size={20} className="animate-spin text-violet-600" />
                           </div>
                       ) : (
                         <>
-                          <img src={selectedImage} alt="Preview" className="h-16 w-16 object-cover rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm" />
+                          <img src={selectedImage} alt="Preview" className="h-16 w-16 object-cover rounded-lg border border-gray-200 dark:border-neutral-700 shadow-sm" />
                           <button 
                             onClick={() => setSelectedImage(undefined)}
                             className="absolute -top-2 -right-2 bg-red-500 text-white p-0.5 rounded-full hover:bg-red-600 shadow-md"
@@ -178,7 +178,7 @@ const ChatBot: React.FC<Props> = ({ cars, activeCarId, logs }) => {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={processingImage}
-                    className="p-3 text-gray-400 dark:text-gray-500 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-slate-800 rounded-xl transition-colors mb-0.5 disabled:opacity-50"
+                    className="p-3 text-gray-400 dark:text-gray-500 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-neutral-800 rounded-xl transition-colors mb-0.5 disabled:opacity-50"
                     title="Foto toevoegen"
                 >
                     <Paperclip size={20} />
@@ -194,7 +194,7 @@ const ChatBot: React.FC<Props> = ({ cars, activeCarId, logs }) => {
                 <input 
                     type="text" 
                     placeholder={selectedImage ? "Voeg een bericht toe..." : "Stel een vraag of stuur een foto..."}
-                    className="flex-1 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 dark:focus:border-violet-500 transition-all placeholder-gray-400 dark:placeholder-gray-600 text-gray-800 dark:text-white"
+                    className="flex-1 bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 dark:focus:border-violet-500 transition-all placeholder-gray-400 dark:placeholder-gray-600 text-gray-800 dark:text-white"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                 />
@@ -214,7 +214,7 @@ const ChatBot: React.FC<Props> = ({ cars, activeCarId, logs }) => {
       {/* Floating Button */}
       <div className="relative group">
         {!isOpen && (
-            <span className="absolute right-0 -top-10 bg-white dark:bg-slate-800 px-3 py-1 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-200 shadow-lg border border-gray-100 dark:border-slate-700 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity mb-2">
+            <span className="absolute right-0 -top-10 bg-white dark:bg-neutral-800 px-3 py-1 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-200 shadow-lg border border-gray-100 dark:border-neutral-700 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity mb-2">
                 Hulp nodig?
             </span>
         )}

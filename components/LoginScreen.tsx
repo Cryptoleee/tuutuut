@@ -36,8 +36,8 @@ const LoginScreen: React.FC<Props> = ({ onGuestLogin }) => {
 
   return (
     <>
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-500">
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl max-w-md w-full text-center border border-gray-100 dark:border-slate-800 relative overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/40 backdrop-blur-sm animate-in fade-in duration-500">
+        <div className="bg-white dark:bg-neutral-900 p-8 rounded-3xl shadow-2xl max-w-md w-full text-center border border-gray-100 dark:border-neutral-800 relative overflow-hidden">
             
             {/* Background blobs */}
             <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full bg-primary/10 blur-2xl"></div>
@@ -64,7 +64,7 @@ const LoginScreen: React.FC<Props> = ({ onGuestLogin }) => {
                     <div className="space-y-3 relative z-10">
                         <button 
                             onClick={handleLogin}
-                            className="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-800 dark:text-white font-semibold py-3.5 rounded-xl transition-all flex items-center justify-center gap-3 shadow-sm group"
+                            className="w-full bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-800 dark:text-white font-semibold py-3.5 rounded-xl transition-all flex items-center justify-center gap-3 shadow-sm group"
                         >
                             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5 group-hover:scale-110 transition-transform" />
                             <span>Inloggen met Google</span>
@@ -72,7 +72,7 @@ const LoginScreen: React.FC<Props> = ({ onGuestLogin }) => {
 
                         <button 
                             onClick={() => setShowGuestWarning(true)}
-                            className="w-full text-gray-500 dark:text-gray-400 font-medium py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-sm"
+                            className="w-full text-gray-500 dark:text-gray-400 font-medium py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors text-sm"
                         >
                             Doorgaan als gast
                         </button>

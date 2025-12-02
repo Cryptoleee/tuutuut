@@ -35,13 +35,13 @@ const NotificationCenter: React.FC<Props> = ({ cars, isOpen, onClose, onSelectCa
         <div className="fixed inset-0 z-40" onClick={onClose}></div>
         
         {/* Popover */}
-        <div className="absolute right-0 top-12 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-gray-100 dark:border-slate-800 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 origin-top-right mx-4 sm:mx-0">
-            <div className="p-4 border-b border-gray-50 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
+        <div className="absolute right-0 top-12 w-80 sm:w-96 bg-white dark:bg-neutral-900 rounded-xl shadow-2xl border border-gray-100 dark:border-neutral-800 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 origin-top-right mx-4 sm:mx-0">
+            <div className="p-4 border-b border-gray-50 dark:border-neutral-800 flex justify-between items-center bg-gray-50/50 dark:bg-neutral-800/50">
                 <h3 className="font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                     <Bell size={16} className="text-gray-500 dark:text-gray-400" />
                     Notificaties
                 </h3>
-                <span className="text-xs bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">{alerts.length}</span>
+                <span className="text-xs bg-gray-200 dark:bg-neutral-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">{alerts.length}</span>
             </div>
             
             <div className="max-h-[400px] overflow-y-auto">
@@ -51,7 +51,7 @@ const NotificationCenter: React.FC<Props> = ({ cars, isOpen, onClose, onSelectCa
                         <p className="text-sm">Geen urgente meldingen.</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-gray-50 dark:divide-slate-800">
+                    <div className="divide-y divide-gray-50 dark:divide-neutral-800">
                         {alerts.map((alert, idx) => {
                             const isOverdue = alert.advice.dueMileage && alert.car.mileage > alert.advice.dueMileage;
                             
@@ -62,7 +62,7 @@ const NotificationCenter: React.FC<Props> = ({ cars, isOpen, onClose, onSelectCa
                                         onSelectCar(alert.car.id, alert.advice.task);
                                         onClose();
                                     }}
-                                    className="p-4 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer group"
+                                    className="p-4 hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer group"
                                 >
                                     <div className="flex items-start gap-3">
                                         <div className={`mt-1 ${alert.advice.urgency === 'high' || isOverdue ? 'text-red-500' : 'text-orange-500'}`}>

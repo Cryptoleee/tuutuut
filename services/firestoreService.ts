@@ -44,3 +44,8 @@ export const updateLogInFirestore = async (userId: string, log: MaintenanceRecor
   const logRef = doc(db, USERS_COLLECTION, userId, 'logs', log.id);
   await updateDoc(logRef, { ...log });
 };
+
+export const deleteLogFromFirestore = async (userId: string, logId: string) => {
+  const logRef = doc(db, USERS_COLLECTION, userId, 'logs', logId);
+  await deleteDoc(logRef);
+};

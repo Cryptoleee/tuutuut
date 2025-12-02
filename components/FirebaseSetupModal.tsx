@@ -48,8 +48,8 @@ const FirebaseSetupModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white dark:from-slate-900 dark:to-slate-800">
+      <div className="bg-white dark:bg-neutral-900 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="p-6 border-b border-gray-100 dark:border-neutral-800 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white dark:from-neutral-900 dark:to-neutral-800">
           <div className="flex items-center gap-3">
              <div className="bg-orange-50 dark:bg-orange-900/30 p-2 rounded-lg text-orange-600 dark:text-orange-500">
                 <Database size={24} />
@@ -83,7 +83,7 @@ const FirebaseSetupModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   Plak Config Hier
               </label>
               <textarea 
-                className="w-full h-48 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-700 rounded-xl p-4 font-mono text-xs text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
+                className="w-full h-48 bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-700 rounded-xl p-4 font-mono text-xs text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
                 placeholder={`{
   "apiKey": "...",
   "authDomain": "...",
@@ -101,7 +101,7 @@ const FirebaseSetupModal: React.FC<Props> = ({ isOpen, onClose }) => {
            </div>
         </div>
 
-        <div className="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50">
+        <div className="p-6 border-t border-gray-100 dark:border-neutral-800 bg-gray-50/50 dark:bg-neutral-900/50">
             <button 
                 onClick={handleSave}
                 disabled={!input.trim()}
