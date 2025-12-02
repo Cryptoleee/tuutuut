@@ -115,7 +115,7 @@ export const getMaintenanceAdvice = async (
   } catch (error: any) {
     console.error("Fout bij ophalen advies (Gemini):", error);
     if (error.message?.includes('403') || error.status === 403) {
-        console.error("TIP: Dit is vaak een probleem met de API Key restricties. Controleer in Google AI Studio of 'localhost' (indien lokaal) of 'tuutuut.vercel.app' is toegestaan.");
+        console.error(`TIP: Toegang geweigerd door Google. Voeg "${window.location.origin}/*" toe aan je API Key restricties in Google AI Studio.`);
     }
     return [];
   }
@@ -242,7 +242,7 @@ export const chatWithMechanic = async (
   } catch (error: any) {
     console.error("Chat error:", error);
     if (error.message?.includes('403') || error.status === 403) {
-        return "Fout: Toegang geweigerd (403). Controleer of dit domein is toegestaan in je Google AI Studio API Key instellingen.";
+        return `Fout: Toegang geweigerd (403). Het domein "${window.location.hostname}" is niet toegestaan in je Google AI Studio API Key instellingen. Voeg "${window.location.origin}/*" toe aan de 'Website restrictions'.`;
     }
     return "Er is een fout opgetreden bij het verbinden met de AI monteur. Controleer of je API Key geldig is.";
   }
