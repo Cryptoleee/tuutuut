@@ -1,16 +1,19 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Car, MaintenanceRecord, MaintenanceSuggestion } from "../types";
 
-// Initialize the client safely
-// We use the env variable if available, otherwise fallback to the hardcoded key provided by the user
-const apiKey = process.env.API_KEY || "AIzaSyCqpGBL2oEj0jzjBKOicFaJHI7A8YlO-7Y";
+// Force the key provided by the user to rule out environment variable issues
+const HARDCODED_KEY = "AIzaSyCqpGBL2oEj0jzjBKOicFaJHI7A8YlO-7Y";
 
-// Debug log (veilig)
-if (!apiKey) {
-  console.error("CRITICAL: API_KEY is undefined.");
-} else {
-  console.log(`Gemini Service gestart. API Key aanwezig (start met: ${apiKey.substring(0, 4)}...)`);
+// Logic: Use Env key if valid, otherwise use hardcoded key
+let apiKey = process.env.API_KEY;
+if (!apiKey || apiKey.length < 10 || apiKey.includes("undefined")) {
+    apiKey = HARDCODED_KEY;
 }
+
+// Debug log to help user verify in browser console
+console.log(`%c[Tuutuut] Gemini Service Init`, 'color: cyan; font-weight: bold;');
+console.log(`Using API Key starting with: ${apiKey ? apiKey.substring(0, 5) + '...' : 'NONE'}`);
+console.log(`Current Origin: ${window.location.origin}`);
 
 const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
@@ -243,7 +246,7 @@ export const chatWithMechanic = async (
   } catch (error: any) {
     console.error("Chat error:", error);
     if (error.message?.includes('403') || error.status === 403) {
-        return `Fout: Toegang geweigerd (403). Het domein "${window.location.hostname}" is niet toegestaan in je Google AI Studio API Key instellingen. Voeg "${window.location.origin}/*" toe aan de 'Website restrictions'.`;
+        return `Fout: Toegang geweigerd (403). Het domein "${window.location.hostname}" is niet toegestaan in je Google AI Studio API Key instellingen. Voeg "${window.location.origin}/*" toe aan de 'Website restrictions'. (Key used: ${apiKey ? apiKey.substring(0,4)+'...' : 'None'})`;
     }
     return "Er is een fout opgetreden bij het verbinden met de AI monteur. Controleer of je API Key geldig is.";
   }
