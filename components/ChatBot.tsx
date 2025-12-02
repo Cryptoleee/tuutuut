@@ -104,7 +104,7 @@ const ChatBot: React.FC<Props> = ({ cars, activeCarId, logs }) => {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-slate-50 dark:bg-neutral-950">
+          <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-gray-50 dark:bg-neutral-950">
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                  <div className={`flex flex-col max-w-[85%] gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>

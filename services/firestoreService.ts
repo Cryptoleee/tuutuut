@@ -25,6 +25,13 @@ export const updateCarInFirestore = async (userId: string, car: Car) => {
   await updateDoc(carRef, { ...car });
 };
 
+export const deleteCarFromFirestore = async (userId: string, carId: string) => {
+  const carRef = doc(db, USERS_COLLECTION, userId, 'cars', carId);
+  await deleteDoc(carRef);
+  // Note: Subcollections (logs) are not automatically deleted in standard Firestore client.
+  // Ideally use a Cloud Function, but for this app logs remain orphaned or we delete them manually if needed.
+};
+
 // -- LOGS --
 
 export const subscribeToLogs = (userId: string, callback: (logs: MaintenanceRecord[]) => void) => {

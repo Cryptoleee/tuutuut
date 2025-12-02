@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider, isFirebaseConfigured } from '../firebase';
-import { Wrench, AlertTriangle, ArrowRight, AlertCircle } from 'lucide-react';
-// import FirebaseSetupModal from './FirebaseSetupModal'; // No longer needed as config is hardcoded
+import { AlertTriangle, ArrowRight, AlertCircle } from 'lucide-react';
+import Logo from './Logo';
 
 interface Props {
   onGuestLogin: () => void;
@@ -45,8 +45,8 @@ const LoginScreen: React.FC<Props> = ({ onGuestLogin }) => {
 
             {!showGuestWarning ? (
                 <>
-                    <div className="relative bg-gradient-to-tr from-primary to-secondary w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary/30">
-                        <Wrench size={32} className="text-white" />
+                    <div className="relative w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                        <Logo size={80} className="drop-shadow-xl" />
                     </div>
                     
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Tuutuut</h1>
@@ -109,7 +109,6 @@ const LoginScreen: React.FC<Props> = ({ onGuestLogin }) => {
             )}
         </div>
         </div>
-        {/* <FirebaseSetupModal isOpen={showSetup} onClose={() => setShowSetup(false)} /> */}
     </>
   );
 };

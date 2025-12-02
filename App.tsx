@@ -5,10 +5,11 @@ import CarDetail from './components/CarDetail';
 import NotificationCenter from './components/NotificationCenter';
 import ChatBot from './components/ChatBot';
 import LoginScreen from './components/LoginScreen';
-import { CarFront, ChevronRight, PlusCircle, Wrench, Bell, Sun, Moon, LogOut, Loader2, User as UserIcon } from 'lucide-react';
+import Logo from './components/Logo';
+import { CarFront, ChevronRight, PlusCircle, Bell, Sun, Moon, LogOut, Loader2, User as UserIcon } from 'lucide-react';
 import { auth } from './firebase';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
-import { subscribeToCars, subscribeToLogs, addCarToFirestore, addLogToFirestore, updateLogInFirestore, updateCarInFirestore, deleteLogFromFirestore } from './services/firestoreService';
+import { subscribeToCars, subscribeToLogs, addCarToFirestore, addLogToFirestore, updateLogInFirestore, updateCarInFirestore, deleteLogFromFirestore, deleteCarFromFirestore } from './services/firestoreService';
 
 const STORAGE_KEY_THEME = 'autoslim_theme';
 const STORAGE_KEY_CARS = 'autoslim_cars';
@@ -133,6 +134,16 @@ const App: React.FC = () => {
     }
   };
 
+  const handleDeleteCar = async (carId: string) => {
+      if (user) {
+          await deleteCarFromFirestore(user.uid, carId);
+      } else {
+          const newCars = cars.filter(c => c.id !== carId);
+          saveCarsLocally(newCars);
+      }
+      setSelectedCarId(null); // Return to dashboard
+  };
+
   const handleAddLog = async (newLog: Omit<MaintenanceRecord, 'id'>) => {
     const log: MaintenanceRecord = { ...newLog, id: crypto.randomUUID() };
 
@@ -214,7 +225,7 @@ const App: React.FC = () => {
 
   if (loadingAuth) {
       return (
-          <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-neutral-950 text-primary">
+          <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-neutral-950 text-primary">
               <Loader2 className="animate-spin" size={48} />
           </div>
       );
@@ -232,8 +243,8 @@ const App: React.FC = () => {
       <nav className="bg-white dark:bg-neutral-900 border-b border-gray-100 dark:border-neutral-800 sticky top-0 z-30 shadow-sm transition-colors duration-300">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => setSelectedCarId(null)}>
-            <div className="bg-gradient-to-tr from-primary to-secondary text-white p-1.5 rounded-lg shadow-sm">
-                <Wrench size={20} />
+            <div className="text-primary">
+                <Logo size={32} />
             </div>
             <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white">Tuutuut</span>
           </div>
@@ -303,6 +314,7 @@ const App: React.FC = () => {
             onDeleteLog={handleDeleteLog}
             onUpdateMileage={(m) => handleUpdateMileage(selectedCar.id, m)}
             onUpdateCar={handleUpdateCar}
+            onDeleteCar={handleDeleteCar}
             highlightedTask={highlightedTask}
           />
         ) : (
@@ -365,7 +377,7 @@ const App: React.FC = () => {
                             onClick={() => setSelectedCarId(car.id)}
                             className="bg-white dark:bg-neutral-900 rounded-2xl shadow-sm border border-gray-100 dark:border-neutral-800 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group relative overflow-hidden flex flex-col h-full"
                         >
-                            <div className="h-56 w-full bg-gray-100 dark:bg-neutral-800 relative overflow-hidden p-4">
+                            <div className="h-64 w-full bg-gray-100 dark:bg-neutral-800 relative overflow-hidden p-4 flex items-center justify-center">
                                 {car.photoUrl ? (
                                     <img src={car.photoUrl} alt={`${car.make} ${car.model}`} className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" />
                                 ) : (
@@ -387,12 +399,12 @@ const App: React.FC = () => {
                                         <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{car.year} • {car.fuelType}</p>
                                     </div>
                                 </div>
-                                <div className="mt-4 pt-4 border-t border-gray-50 dark:border-neutral-800 flex items-center justify-between text-sm">
+                                <div className="mt-4 pt-4 border-t border-gray-50 dark:border-neutral-800 flex items-center justify-center text-sm">
                                     <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></div>
                                         KM-stand
                                     </span>
-                                    <span className="font-semibold text-gray-900 dark:text-gray-100 font-mono tracking-tight">{car.mileage.toLocaleString()}</span>
+                                    <span className="font-semibold text-gray-900 dark:text-gray-100 font-mono tracking-tight ml-auto">{car.mileage.toLocaleString()}</span>
                                 </div>
                             </div>
                             {car.lastAdvice && car.lastAdvice.some(a => a.urgency === 'high') && (
@@ -407,7 +419,7 @@ const App: React.FC = () => {
                     ))}
                     <div 
                         onClick={() => setAddCarModalOpen(true)}
-                        className="bg-gray-50 dark:bg-neutral-900 rounded-2xl border-2 border-dashed border-gray-200 dark:border-neutral-800 hover:border-primary/50 hover:bg-blue-50/30 dark:hover:bg-neutral-800/50 transition-all cursor-pointer flex flex-col items-center justify-center h-full min-h-[300px] gap-3 group"
+                        className="bg-gray-50 dark:bg-neutral-900 rounded-2xl border-2 border-dashed border-gray-200 dark:border-neutral-800 hover:border-primary/50 hover:bg-blue-50/30 dark:hover:bg-neutral-800/50 transition-all cursor-pointer flex flex-col items-center justify-center h-full min-h-[350px] gap-3 group"
                     >
                         <div className="bg-white dark:bg-neutral-800 p-4 rounded-full shadow-sm group-hover:scale-110 transition-transform">
                             <PlusCircle className="text-gray-400 dark:text-gray-500 group-hover:text-primary" size={32} />

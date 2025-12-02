@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Car, MaintenanceRecord, MaintenanceSuggestion, CustomMaintenanceInterval } from '../types';
-import { ArrowLeft, Plus, History, Sparkles, Gauge, CheckCircle, RefreshCw, Clock, Euro, Calendar, AlertCircle, Info, PenTool, CarFront, Camera, ChevronDown, ChevronUp, Lightbulb, Pencil, FileText, Settings, X, PlusCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, History, Sparkles, Gauge, CheckCircle, RefreshCw, Clock, Euro, Calendar, AlertCircle, Info, PenTool, CarFront, Camera, ChevronDown, ChevronUp, Lightbulb, Pencil, FileText, Settings, X, PlusCircle, Trash2, ScanLine } from 'lucide-react';
 import { getMaintenanceAdvice } from '../services/geminiService';
 import AddLogModal from './AddLogModal';
 import AddCarModal from './AddCarModal';
@@ -14,13 +14,14 @@ interface Props {
   onBack: () => void;
   onAddLog: (record: Omit<MaintenanceRecord, 'id'>) => Promise<void>;
   onUpdateLog: (record: MaintenanceRecord) => Promise<void>;
-  onDeleteLog?: (logId: string) => Promise<void>; // Added prop
+  onDeleteLog?: (logId: string) => Promise<void>;
   onUpdateMileage: (newMileage: number) => Promise<void>;
   onUpdateCar: (updatedCar: Car) => Promise<void>;
+  onDeleteCar?: (carId: string) => Promise<void>; // Added prop
   highlightedTask?: string;
 }
 
-const CarDetail: React.FC<Props> = ({ car, logs, onBack, onAddLog, onUpdateLog, onDeleteLog, onUpdateMileage, onUpdateCar, highlightedTask }) => {
+const CarDetail: React.FC<Props> = ({ car, logs, onBack, onAddLog, onUpdateLog, onDeleteLog, onUpdateMileage, onUpdateCar, onDeleteCar, highlightedTask }) => {
   const [isLogModalOpen, setLogModalOpen] = useState(false);
   const [isEditCarModalOpen, setEditCarModalOpen] = useState(false);
   const [loadingAdvice, setLoadingAdvice] = useState(false);
@@ -65,6 +66,10 @@ const CarDetail: React.FC<Props> = ({ car, logs, onBack, onAddLog, onUpdateLog, 
 
   const fetchAdvice = async () => {
     setLoadingAdvice(true);
+    // Force a small delay to make sure the animation is perceived if API is too fast
+    // and to let the UI update the loading state
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const advice = await getMaintenanceAdvice(car, logs);
     
     const updatedCar = {
@@ -421,7 +426,7 @@ const CarDetail: React.FC<Props> = ({ car, logs, onBack, onAddLog, onUpdateLog, 
           {/* Main Card: Monitor or Settings */}
           <div className="relative perspective-1000">
             {/* Monitor View */}
-            <div className={`bg-white dark:bg-neutral-900 rounded-2xl shadow-sm border border-gray-100 dark:border-neutral-800 overflow-hidden min-h-[400px] transition-all duration-500 ${isSettingsMode ? 'hidden' : 'block'}`}>
+            <div className={`bg-white dark:bg-neutral-900 rounded-2xl shadow-sm border overflow-hidden min-h-[400px] transition-all duration-500 relative z-0 ${loadingAdvice ? 'border-red-500/50 shadow-[0_0_30px_-5px_rgba(239,68,68,0.3)] dark:shadow-[0_0_30px_-5px_rgba(239,68,68,0.2)]' : 'border-gray-100 dark:border-neutral-800'} ${isSettingsMode ? 'hidden' : 'block'}`}>
                 <div className="p-5 border-b border-gray-50 dark:border-neutral-800 flex justify-between items-center bg-gradient-to-r from-blue-50/50 to-teal-50/50 dark:from-neutral-800 dark:to-neutral-800/50">
                     <div className="flex items-center gap-2">
                         <div className="bg-white dark:bg-neutral-800 p-1.5 rounded-lg shadow-sm">
@@ -434,7 +439,8 @@ const CarDetail: React.FC<Props> = ({ car, logs, onBack, onAddLog, onUpdateLog, 
                     <div className="flex items-center gap-2">
                         <button 
                             onClick={() => setIsSettingsMode(true)}
-                            className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"
+                            disabled={loadingAdvice}
+                            className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg transition-colors disabled:opacity-50"
                             title="Instellingen & Intervallen"
                         >
                             <Settings size={18} />
@@ -442,7 +448,7 @@ const CarDetail: React.FC<Props> = ({ car, logs, onBack, onAddLog, onUpdateLog, 
                         <button 
                             onClick={fetchAdvice} 
                             disabled={loadingAdvice}
-                            className="flex items-center gap-2 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shadow-sm"
+                            className="flex items-center gap-2 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shadow-sm disabled:opacity-70 disabled:cursor-wait"
                         >
                             <RefreshCw size={14} className={loadingAdvice ? "animate-spin" : ""} />
                             {loadingAdvice ? 'Analyseren...' : 'Verversen'}
@@ -450,13 +456,26 @@ const CarDetail: React.FC<Props> = ({ car, logs, onBack, onAddLog, onUpdateLog, 
                     </div>
                 </div>
                 
-                <div className="p-4 bg-gray-50/30 dark:bg-neutral-950/30">
+                <div className="p-4 bg-gray-50/30 dark:bg-neutral-950/30 relative">
                     {loadingAdvice ? (
-                        <div className="space-y-6">
-                            <div className="flex flex-col items-center justify-center py-12 text-gray-400 dark:text-gray-500">
-                                <Sparkles className="animate-pulse text-primary mb-4" size={48} />
-                                <p>De AI monteur analyseert je onderhoudshistorie...</p>
+                        <div className="flex flex-col items-center justify-center py-16 animate-in fade-in duration-500">
+                            <div className="relative mb-8">
+                                {/* Glow Effect */}
+                                <div className="absolute inset-0 bg-red-500/20 rounded-full blur-xl animate-pulse"></div>
+                                
+                                <div className="relative z-10 bg-white dark:bg-neutral-900 p-6 rounded-full shadow-xl border-4 border-red-50 dark:border-red-900/30 overflow-hidden">
+                                    <CarFront size={48} className="text-gray-400 dark:text-gray-500" />
+                                    
+                                    {/* Scanning Laser Line */}
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-[scan_2s_ease-in-out_infinite] shadow-[0_0_10px_rgba(239,68,68,0.8)]"></div>
+                                </div>
                             </div>
+                            
+                            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 animate-pulse">AI Diagnose Bezig...</h3>
+                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2 text-center max-w-xs">
+                                Onderhoudshistorie analyseren & intervallen berekenen. <br/>
+                                <span className="text-xs opacity-70">Dit kan enkele seconden duren.</span>
+                            </p>
                         </div>
                     ) : car.lastAdvice && car.lastAdvice.length > 0 ? (
                         <div className="space-y-4">
@@ -720,6 +739,7 @@ const CarDetail: React.FC<Props> = ({ car, logs, onBack, onAddLog, onUpdateLog, 
         isOpen={isEditCarModalOpen}
         onClose={() => setEditCarModalOpen(false)}
         onSave={handleEditCarSave}
+        onDelete={onDeleteCar}
         userId={auth.currentUser ? auth.currentUser.uid : 'guest'}
         initialData={car}
       />

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Car } from '../types';
-import { X, CarFront, Search, Loader2, Camera, PlusCircle, Save } from 'lucide-react';
+import { X, CarFront, Search, Loader2, Camera, PlusCircle, Save, Trash2, AlertCircle } from 'lucide-react';
 import { fetchCarDataByLicensePlate } from '../services/rdwService';
 import { fetchCarImage } from '../services/imageService';
 import { uploadFileToStorage } from '../services/storageService';
@@ -11,11 +11,12 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSave: (car: Omit<Car, 'id'>) => Promise<void>;
+  onDelete?: (carId: string) => Promise<void>;
   userId: string;
   initialData?: Car;
 }
 
-const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initialData }) => {
+const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, onDelete, userId, initialData }) => {
   const defaultForm = {
     make: '',
     model: '',
@@ -31,9 +32,11 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initial
   const [formData, setFormData] = useState(defaultForm);
   const [loadingRDW, setLoadingRDW] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const [rdwError, setRdwError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -55,6 +58,7 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initial
         }
         setSelectedFile(null);
         setRdwError(null);
+        setShowDeleteConfirm(false);
     }
   }, [isOpen, initialData]);
 
@@ -106,6 +110,20 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initial
     }
   };
 
+  const handleDelete = async () => {
+    if (!initialData?.id || !onDelete) return;
+    setIsDeleting(true);
+    try {
+      await onDelete(initialData.id);
+      handleClose();
+    } catch (error) {
+      console.error("Delete failed", error);
+      alert("Kan auto niet verwijderen.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleClose = () => {
     onClose();
     setFormData(defaultForm);
@@ -148,6 +166,13 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initial
         setIsCompressing(false);
       }
     }
+  };
+
+  const handleRemovePhoto = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setFormData(prev => ({ ...prev, photoUrl: '' }));
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleLookupLicensePlate = async () => {
@@ -211,6 +236,14 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initial
                         <Camera size={20} /> Wijzigen
                     </span>
                   </div>
+                  <button 
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors z-20"
+                    title="Foto verwijderen"
+                  >
+                      <Trash2 size={16} />
+                  </button>
                 </>
             ) : (
                 <div className="text-gray-400 dark:text-gray-500 flex flex-col items-center">
@@ -350,15 +383,56 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, userId, initial
               />
           </div>
 
-          <button 
-            type="submit"
-            disabled={isSubmitting || isCompressing}
-            className="w-full mt-2 bg-gradient-to-r from-primary to-secondary text-white font-bold py-3.5 rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : initialData ? <Save size={20} /> : <PlusCircle size={20} />}
-            {isSubmitting ? 'Bezig...' : initialData ? 'Wijzigingen Opslaan' : 'Auto Toevoegen'}
-          </button>
+          <div className="flex gap-3 mt-2">
+            {initialData && onDelete && (
+                <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3.5 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                    title="Auto Verwijderen"
+                >
+                    <Trash2 size={20} />
+                </button>
+            )}
+
+            <button 
+                type="submit"
+                disabled={isSubmitting || isCompressing}
+                className="flex-1 bg-gradient-to-r from-primary to-secondary text-white font-bold py-3.5 rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+                {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : initialData ? <Save size={20} /> : <PlusCircle size={20} />}
+                {isSubmitting ? 'Bezig...' : initialData ? 'Wijzigingen Opslaan' : 'Auto Toevoegen'}
+            </button>
+          </div>
         </form>
+
+        {/* Delete Confirmation Overlay */}
+        {showDeleteConfirm && (
+             <div className="absolute inset-0 z-20 bg-white/95 dark:bg-neutral-900/95 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200">
+                 <div className="bg-red-100 dark:bg-red-900/30 p-4 rounded-full text-red-600 dark:text-red-400 mb-4">
+                     <AlertCircle size={32} />
+                 </div>
+                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Auto Verwijderen?</h3>
+                 <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-xs">
+                     Weet je zeker dat je de <strong>{formData.make} {formData.model}</strong> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+                 </p>
+                 <div className="flex gap-3 w-full max-w-xs">
+                     <button 
+                        onClick={() => setShowDeleteConfirm(false)}
+                        className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-neutral-700 font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-800"
+                     >
+                         Annuleren
+                     </button>
+                     <button 
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold shadow-lg shadow-red-500/20"
+                     >
+                         {isDeleting ? 'Verwijderen...' : 'Ja, verwijder'}
+                     </button>
+                 </div>
+             </div>
+        )}
       </div>
     </div>
   );

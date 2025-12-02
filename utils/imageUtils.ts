@@ -5,6 +5,11 @@
  * Quality: 0.7 (JPEG)
  */
 export const compressImage = async (file: File): Promise<File> => {
+  // If file is SVG, do not compress it to maintain transparency and quality
+  if (file.type === 'image/svg+xml') {
+    return file;
+  }
+
   // If file is already small (< 500KB) and represents an image, just return it
   if (file.size < 500 * 1024) {
     return file;
