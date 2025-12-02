@@ -3,6 +3,14 @@ import { Car, MaintenanceRecord, MaintenanceSuggestion } from "../types";
 
 // Initialize the client safely
 const apiKey = process.env.API_KEY;
+
+// Debug log (veilig)
+if (!apiKey) {
+  console.error("CRITICAL: API_KEY is undefined in de browser. Controleer vite.config.ts en je .env bestand.");
+} else {
+  console.log(`Gemini Service gestart. API Key aanwezig (start met: ${apiKey.substring(0, 4)}...)`);
+}
+
 const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
 export const getMaintenanceAdvice = async (
@@ -10,7 +18,7 @@ export const getMaintenanceAdvice = async (
   history: MaintenanceRecord[]
 ): Promise<MaintenanceSuggestion[]> => {
   if (!apiKey) {
-    console.error("API_KEY ontbreekt in environment variables.");
+    console.error("API_KEY ontbreekt. Kan geen advies ophalen.");
     return [];
   }
 
@@ -104,8 +112,11 @@ export const getMaintenanceAdvice = async (
     if (!jsonText) return [];
 
     return JSON.parse(jsonText) as MaintenanceSuggestion[];
-  } catch (error) {
+  } catch (error: any) {
     console.error("Fout bij ophalen advies (Gemini):", error);
+    if (error.message?.includes('403') || error.status === 403) {
+        console.error("TIP: Dit is vaak een probleem met de API Key restricties. Controleer in Google AI Studio of 'localhost' (indien lokaal) of 'tuutuut.vercel.app' is toegestaan.");
+    }
     return [];
   }
 };
@@ -123,7 +134,7 @@ export const chatWithMechanic = async (
   contextData: { cars: Car[]; activeCarId: string | null; logs: MaintenanceRecord[] }
 ): Promise<string> => {
   if (!apiKey) {
-      return "Configuratie fout: API Key ontbreekt.";
+      return "Configuratie fout: API Key ontbreekt in de applicatie.";
   }
 
   try {
@@ -228,8 +239,11 @@ export const chatWithMechanic = async (
     });
 
     return response.text || "Sorry, ik begreep dat niet helemaal.";
-  } catch (error) {
+  } catch (error: any) {
     console.error("Chat error:", error);
-    return "Er is een fout opgetreden bij het verbinden met de AI monteur. Controleer de API Key.";
+    if (error.message?.includes('403') || error.status === 403) {
+        return "Fout: Toegang geweigerd (403). Controleer of dit domein is toegestaan in je Google AI Studio API Key instellingen.";
+    }
+    return "Er is een fout opgetreden bij het verbinden met de AI monteur. Controleer of je API Key geldig is.";
   }
 };

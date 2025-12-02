@@ -1,10 +1,19 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig({
-  plugins: [react()],
-  define: {
-    // Safely inject ONLY the API_KEY, preserving the rest of process.env
-    'process.env.API_KEY': JSON.stringify(process.env.API_KEY)
-  }
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => {
+  // Load env file based on `mode` in the current working directory.
+  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
+  const env = loadEnv(mode, (process as any).cwd(), '');
+
+  return {
+    plugins: [react()],
+    define: {
+      // Dit zorgt ervoor dat process.env.API_KEY beschikbaar is in de browser code
+      'process.env.API_KEY': JSON.stringify(env.API_KEY),
+      // Polyfill voor andere process.env calls om crashes te voorkomen
+      'process.env': {}
+    }
+  };
 });
