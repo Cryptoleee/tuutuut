@@ -196,7 +196,7 @@ const DIYModule: React.FC<Props> = ({ carId, tasks, onAddTask, onUpdateTask, onD
                                 </div>
                                 <input 
                                     type="date" 
-                                    className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400"
+                                    className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm outline-none text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:[color-scheme:dark]"
                                     value={scheduledDate}
                                     onChange={(e) => setScheduledDate(e.target.value)}
                                 />

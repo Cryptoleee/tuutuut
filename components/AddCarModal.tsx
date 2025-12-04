@@ -198,7 +198,7 @@ const AddCarModal: React.FC<Props> = ({ isOpen, onClose, onSave, onDelete, userI
     setLoadingRDW(false);
   };
 
-  const inputClasses = "w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-950 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all duration-200";
+  const inputClasses = "w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-950 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all duration-200 dark:[color-scheme:dark]";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">

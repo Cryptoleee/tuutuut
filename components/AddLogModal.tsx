@@ -202,7 +202,7 @@ const AddLogModal: React.FC<Props> = ({ isOpen, onClose, onSave, onDelete, carId
       if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const inputClasses = "w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-950 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all duration-200";
+  const inputClasses = "w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-950 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all duration-200 dark:[color-scheme:dark]";
   const isEditing = initialData && initialData.id;
 
   return (
