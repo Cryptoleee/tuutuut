@@ -1,6 +1,19 @@
+
 export interface CustomMaintenanceInterval {
   taskName: string;
   intervalKm: number;
+}
+
+export interface DIYTask {
+  id: string;
+  carId: string;
+  title: string;
+  status: 'todo' | 'in_progress' | 'done';
+  priority: 'low' | 'normal' | 'high';
+  estimatedCost?: number;
+  notes?: string;
+  scheduledDate?: string; // YYYY-MM-DD
+  createdAt: string;
 }
 
 export interface Car {
